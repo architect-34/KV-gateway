@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package telemetry;
+
+option go_package = "github.com/avidubey/kv-gateway/proto/telemetry";
+
+service WorkerTelemetry {
+  // Worker pushes telemetry to gateway continuously.
+  rpc Stream(stream HeartbeatRequest) returns (stream HeartbeatAck);
+  // Gateway asks worker to run a generation, streamed back token by token.
+  rpc Generate(GenerateRequest) returns (stream Token);
+}
+
+message HeartbeatRequest {
+  string worker_id = 1;
+  int64 kv_used_tokens = 2;
+  int64 kv_capacity_tokens = 3;
+  int32 active_requests = 4;
+  double tokens_per_sec = 5;
+}
+
+message HeartbeatAck { bool ok = 1; }
+
+message GenerateRequest {
+  string request_id = 1;
+  string prompt = 2;
+  int32 max_tokens = 3;
+}
+
+message Token {
+  string text = 1;
+  bool done = 2;
+}
